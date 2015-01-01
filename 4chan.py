@@ -25,13 +25,15 @@ thread = tmp.group(2)
 
 destination += board + "_" + thread + "/"
 
-links = re.findall(r'href="(//i.4cdn.org/[a-zA-Z]+/(\d+.[a-zA-Z]+))"', html)
-links = list(set(links))  # removes duplicates
+pat = r'<a class=\"[\w -]+\" href="(//i.4cdn.org/[a-zA-Z]+/(\d+.[a-zA-Z]+))"'
+links = re.findall(pat, html)
 
 if not os.path.exists(destination):
     os.mkdir(destination)
 
 i = 0  # count number of downloads
+
+print "Downloading to " + destination
 
 for link in links:
     path = os.path.join(destination, link[1])
