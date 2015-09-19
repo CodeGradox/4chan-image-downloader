@@ -74,7 +74,7 @@ for link in links:
     if not os.path.isfile(path):
         f = urlopen('http:' + link[0])
         with open(os.path.abspath(path), 'wb') as local_file:
-            print 'Downloading %s' % link[1]
+            print '-> %s' % link[1]
             local_file.write(f.read())
             counter += 1
 print ' %d new images added' % counter
