@@ -1,4 +1,4 @@
-4chan-image-downloader
+4chan image downloader
 ======================
 
 Requires python 2.7
