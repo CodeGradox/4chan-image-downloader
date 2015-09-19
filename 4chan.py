@@ -1,9 +1,9 @@
 from urllib2 import urlopen
+from urllib2 import URLError
 from sys import exit
 import re
 import argparse
 import os
-
 
 def validURL(s):
     from urlparse import urlparse
@@ -26,21 +26,23 @@ def getURLfromClipboard():
     return s
 
 parser = argparse.ArgumentParser(description='Image downloader for 4chan')
-parser.add_argument('input', nargs='?', help='HTML link to a thread on 4chan',
-                    default=getURLfromClipboard())
+parser.add_argument('input', nargs='?', help='HTML link to a thread on 4chan')
 parser.add_argument('-d', '--destination', help='The destination folder',
                     required=False)
 
 args = parser.parse_args()
 
-url = args.input
+url = args.input if args.input else getURLfromClipboard()
 destination = args.destination if args.destination else '4chan_Images/'
 
 try:
     html = urlopen(url).read()
 except ValueError:
-    print ' Invalid url or thread is 404'
+    print ' Invalid URL or thread is 404'
     exit(1)
+except URLError, e:
+	print ' Invalid or broken URL'
+	exit(1)
 
 tmp = re.search(r'([a-zA-Z]+)/thread/(\d+)/?', url)
 board = tmp.group(1)
