@@ -33,7 +33,7 @@ parser.add_argument('-d', '--destination', help='The destination folder',
 args = parser.parse_args()
 
 url = args.input if args.input else getURLfromClipboard()
-destination = args.destination if args.destination else '4chan_Images/'
+destination = args.destination + '\\' if args.destination else '4chan_Images/'
 
 try:
     html = urlopen(url).read()
