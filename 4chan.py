@@ -30,11 +30,14 @@ parser.add_argument('input', nargs='?', help='HTML link to a thread on 4chan')
 parser.add_argument('-d', '--destination', help='The destination folder',
                     required=False)
 
+# Check arguments
 args = parser.parse_args()
 
+# Get url from args or clipboard and setup download path
 url = args.input if args.input else getURLfromClipboard()
 destination = args.destination + '\\' if args.destination else '4chan_Images/'
 
+# Get the thread
 try:
     html = urlopen(url).read()
 except ValueError:
@@ -44,21 +47,26 @@ except URLError, e:
 	print ' Invalid or broken URL'
 	exit(1)
 
+# Get the thread number and board name
 tmp = re.search(r'([a-zA-Z]+)/thread/(\d+)/?', url)
 board = tmp.group(1)
 thread = tmp.group(2)
 
+# Append destination folder to download path
 destination += board + '_' + thread + '/'
 
-pat = r'<a class=\"[\w -]+\" href="(//i.4cdn.org/[a-zA-Z]+/(\d+.[a-zA-Z]+))"'
-links = re.findall(pat, html)
-
+# Create destination folder
 if not os.path.exists(destination):
     os.makedirs(destination)
+
+# Regex for finding the img tags from the HTML document
+pat = r'<a class=\"[\w -]+\" href="(//i.4cdn.org/[a-zA-Z]+/(\d+.[a-zA-Z]+))"'
+links = re.findall(pat, html)
 
 print ' Downloading to %s' % destination
 print ' %d images found' % len(links)
 
+# Download all the images to destination folder
 counter = 0
 for link in links:
     path = os.path.join(destination, link[1])
