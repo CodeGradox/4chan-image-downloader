@@ -51,11 +51,8 @@ destination += board + '_' + thread + '/'
 pat = r'<a class=\"[\w -]+\" href="(//i.4cdn.org/[a-zA-Z]+/(\d+.[a-zA-Z]+))"'
 links = re.findall(pat, html)
 
-if not os.path.exists('4chan_Images/'):
-	os.mkdir('4chan_Images/')
-
 if not os.path.exists(destination):
-    os.mkdir(destination)
+    os.makedirs(destination)
 
 print ' Downloading to %s' % destination
 print ' %d images found' % len(links)
