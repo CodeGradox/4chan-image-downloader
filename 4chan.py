@@ -20,9 +20,9 @@ def getURLfromClipboard():
     s = r.clipboard_get()
     r.destroy
     if not validURL(s):
-        print 'Invalid URL'
+        print '### Invalid URL ###'
         exit(1)
-    print ' Copied URL from clipboard'
+    print '### Copied clipboard ###'
     return s
 
 parser = argparse.ArgumentParser(description='Image downloader for 4chan')
@@ -41,10 +41,10 @@ destination = args.destination + '\\' if args.destination else '4chan_Images/'
 try:
     html = urlopen(url).read()
 except ValueError:
-    print ' Invalid URL or thread is 404'
+    print '### Invalid URL or thread is 404 ###'
     exit(1)
 except URLError, e:
-	print ' Invalid or broken URL'
+	print '### Invalid or broken URL ###'
 	exit(1)
 
 # Get the thread number and board name
@@ -63,8 +63,8 @@ if not os.path.exists(destination):
 pat = r'<a class=\"[\w -]+\" href="(//i.4cdn.org/[a-zA-Z]+/(\d+.[a-zA-Z]+))"'
 links = re.findall(pat, html)
 
-print ' Downloading to %s' % destination
-print ' %d images found' % len(links)
+print 'Downloading to %s' % destination
+print 'Images found: %d' % len(links)
 
 # Download all the images to destination folder
 counter = 0
@@ -77,4 +77,4 @@ for link in links:
             print '-> %s' % link[1]
             local_file.write(f.read())
             counter += 1
-print ' %d new images added' % counter
+print 'Images added: %d\n' % counter
