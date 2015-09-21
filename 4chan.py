@@ -19,7 +19,7 @@ def getURLfromClipboard():
     r.withdraw()
     s = r.clipboard_get()
     r.destroy
-    if not validURL(s):
+    if not s or not validURL(s):
         print '### Invalid URL ###'
         exit(1)
     print '### Copied clipboard ###'
