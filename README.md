@@ -3,7 +3,7 @@
 
 ####Requires python 2.7####
 
-:tada: **New**: Now uses JSON instead of Regex to parse the HTML response!
+:tada: **New**: Now uses JSON instead of Regex to retrieve image links!
 
 Code has been cleaned up, making it is easier to read and is more modular.
 
