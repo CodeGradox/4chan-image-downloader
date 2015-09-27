@@ -1,7 +1,11 @@
-4chan image downloader
+4chan image downloader Version 2
 ======================
 
-Requires python 2.7
+####Requires python 2.7####
+
+**New**: Now uses JSON instead of Regex to parse the HTML response!
+
+Code has been cleaned up, making it is easier to read and is more modular.
 
 Usage:
 ```sh
