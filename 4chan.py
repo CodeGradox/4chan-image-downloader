@@ -1,80 +1,86 @@
-from urllib2 import urlopen
-from urllib2 import URLError
-from sys import exit
-import re
+import urllib2
+import json
 import argparse
+import re
 import os
 
-def validURL(s):
-    from urlparse import urlparse
-    o = urlparse(s)
-    if o.scheme == 'http' or 'https':
-        return True
-    return False
+validURL = r"http[s]?:\/\/boards\.4chan\.org\/(\w+)\/thread\/(\d+)" # board, thread
+jsonURL  = "https://a.4cdn.org/%s/thread/%s.json"                   # board, thread
+imageURL = "https://i.4cdn.org/%s/%s%s"                             # board, file, extension
 
 
-def getURLfromClipboard():
+def argParser():
+    parser = argparse.ArgumentParser(description='Image downloader for 4chan version 2')
+    parser.add_argument('input', nargs='?', help='HTML link to a 4chan thread')
+    parser.add_argument('-d', '--path', help='The destination folder',
+                        required=False)
+    return parser.parse_args()
+
+
+def getURLFromClipboard():
     from Tkinter import Tk
     r = Tk()
     r.withdraw()
-    s = r.clipboard_get()
+    url = r.clipboard_get()
     r.destroy
-    if not s or not validURL(s):
-        print '### Invalid URL ###'
+    print "Copied URL from clipboard"
+    return url
+
+
+def getMatchesFromURL(url):
+    match = re.search(validURL, url)
+    if not match:
+        print "URL Error: URL is not a 4chan thread URL!"
         exit(1)
-    print '### Copied clipboard ###'
-    return s
+    return (match.group(1), match.group(2)) # board, thread
 
-parser = argparse.ArgumentParser(description='Image downloader for 4chan')
-parser.add_argument('input', nargs='?', help='HTML link to a thread on 4chan')
-parser.add_argument('-d', '--destination', help='The destination folder',
-                    required=False)
 
-# Check arguments
-args = parser.parse_args()
+def fetchJSON(url, board, thread):
+    try:
+        response = urllib2.urlopen(jsonURL % (board, thread))
+        return response.read()
+    except(ValueError, urllib2.URLError, urllib2.URLError) as e:
+        print e
+        exit(1)        
 
-# Get url from args or clipboard and setup download path
-url = args.input if args.input else getURLfromClipboard()
-destination = args.destination + '\\' if args.destination else '4chan_Images/'
 
-# Get the thread
-try:
-    html = urlopen(url).read()
-except ValueError:
-    print '### Invalid URL or thread is 404 ###'
-    exit(1)
-except URLError, e:
-	print '### Invalid or broken URL ###'
-	exit(1)
+def downloadImages(data, board):
+    if not os.path.exists(path):
+        os.makedirs(path)
+    print "Downloading to %s" % path
+    print "Images found: %d" % (data["posts"][0]["images"] + 1)
+    for post in data["posts"]:
+        if "tim" in post:
+            tim, ext = (post["tim"], post["ext"]) # time = filename
+            image = imageURL % (board, tim, ext)
+            saveImage(image, "%s%s" % (tim, ext))
 
-# Get the thread number and board name
-tmp = re.search(r'([a-zA-Z]+)/thread/(\d+)/?', url)
-board = tmp.group(1)
-thread = tmp.group(2)
 
-# Append destination folder to download path
-destination += board + '_' + thread + '/'
-
-# Create destination folder
-if not os.path.exists(destination):
-    os.makedirs(destination)
-
-# Regex for finding the img tags from the HTML document
-pat = r'<a class=\"[\w -]+\" href="(//i.4cdn.org/[a-zA-Z]+/(\d+.[a-zA-Z]+))"'
-links = re.findall(pat, html)
-
-print 'Downloading to %s' % destination
-print 'Images found: %d' % len(links)
-
-# Download all the images to destination folder
-counter = 0
-for link in links:
-    path = os.path.join(destination, link[1])
-
-    if not os.path.isfile(path):
-        f = urlopen('http:' + link[0])
-        with open(os.path.abspath(path), 'wb') as local_file:
-            print '-> %s' % link[1]
+def saveImage(image, filename):
+    global imageCount
+    imagepath = os.path.join(path, filename)
+    if not os.path.isfile(imagepath):
+        f = urllib2.urlopen(image)
+        with open(os.path.abspath(imagepath), "wb") as local_file:
+            print "-> %s" % filename
             local_file.write(f.read())
-            counter += 1
-print 'Images added: %d\n' % counter
+            imageCount += 1
+
+
+def main():
+    global path
+    global imageCount
+
+    imageCount = 0
+    args = argParser()                                      # Get input
+    url = args.input or getURLFromClipboard()               # Get url
+    board, thread = getMatchesFromURL(url)                  # Get board and thread
+    path = args.path or "4chan_Images"                      # Set path
+    path += "\\%s_%s" % (board, thread)                     # Add image folder to path
+
+    data = json.loads(fetchJSON(url, board, thread))        # Get JSON data
+    downloadImages(data, board)                             # Download images
+    print "Images added: %d" % imageCount
+
+if __name__ == "__main__":
+    main()
