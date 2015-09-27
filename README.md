@@ -5,7 +5,7 @@
 
 :tada: **New**: Now uses JSON instead of Regex to retrieve image links!
 
-Code has been cleaned up, making it is easier to read and is more modular.
+Code has been cleaned up, making it more modular and easier to read.
 
 Usage:
 ```sh
