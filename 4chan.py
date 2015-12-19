@@ -14,6 +14,8 @@ def argParser():
     parser.add_argument('input', nargs='?', help='HTML link to a 4chan thread')
     parser.add_argument('-d', '--path', help='The destination folder',
                         required=False)
+    parser.add_argument('-o', '--openfolder', help='Open destination folder',
+                        action='store_true')
     return parser.parse_args()
 
 
@@ -66,6 +68,14 @@ def saveImage(image, filename):
             local_file.write(f.read())
             imageCount += 1
 
+def openSystemFolder():
+    import platform
+    if platform.system() == "Windows":
+        openWindowsFileExplorer()
+
+def openWindowsFileExplorer():
+    import subprocess
+    subprocess.call("explorer %s" % path)
 
 def main():
     global path
@@ -81,6 +91,9 @@ def main():
     data = json.loads(fetchJSON(url, board, thread))        # Get JSON data
     downloadImages(data, board)                             # Download images
     print "Images added: %d" % imageCount
+
+    if args.openfolder:
+        openSystemFolder()
 
 if __name__ == "__main__":
     main()
